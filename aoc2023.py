@@ -174,10 +174,33 @@ def day_3_final(text):
         return total
 
 def day_4(text):
-        print('day 4 is not implemented yet')
+        total = 0
+        for line in text.strip().split('\n'):
+               round, nums = line.split(': ')
+               winning, scratched = nums.split(' | ')
+               winning = winning.split()
+               scratched = scratched.split()
+               found = sum([num in winning for num in scratched])
+               print(found)
+               if found:
+                      total += 2**(found-1)
+                      print(total)
+        return total
 
 def day_4_final(text):
-        print('day 4 final is not implemented yet')
+        total = 0
+        numcards = [1 for _ in  range(len(text.split('\n')))]
+        for i, line in enumerate(text.strip().split('\n')):
+               round, nums = line.split(': ')
+               winning, scratched = nums.split(' | ')
+               winning = winning.split()
+               scratched = scratched.split()
+               found = sum([num in winning for num in scratched])
+               print(found)
+               for index in range(found):
+                        numcards[index+1 + i] += 1*numcards[i]
+        print(numcards)
+        return sum(numcards)
 
 def day_5(text):
         print('day 5 is not implemented yet')
