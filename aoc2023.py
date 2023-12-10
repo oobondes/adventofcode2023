@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-
+from os import system
 import bs4, requests, argparse
 from pathlib import Path
 from getpass import getpass
 from re import findall, DOTALL
+import colorama
 import json
 import pprint
 import random
 import numpy
+from time import sleep
 from math import floor
 from tqdm import tqdm
 
@@ -451,11 +453,151 @@ def day_9_final(text):
 
 
 def day_10(text):
-    print("day 10 is not implemented yet")
+    # appending buffer .'s so I don't have to bound check
+    pipes = text.strip().split('\n')
+    pipes.append('.'*len(pipes[0]))
+    pipes.insert(0,'.'*len(pipes[0]))
+    pipes = [f".{line}." for line in pipes]
+    print('\n'.join(pipes))
+    s=(0,0)
+    for i , line in enumerate(pipes):
+        if (p := line.find('S')) != -1:
+            s = (i,p)
+            break
+    print(s)
+    visited = [s]
+    #next is a keyword. I should change this
+    next = []
+    count = 1
+    if pipes[s[0]+1][s[1]] in "F7|":
+        next.append((s[0]+1,s[1]))
+    if pipes[s[0]-1][s[1]] in "JL|":
+        next.append((s[0]-1,s[1]))
+    if pipes[s[0]][s[1]+1] in "J7-":
+        next.append((s[0],s[1]+1))
+    if pipes[s[0]][s[1]-1] in "FL-":
+        next.append((s[0],s[1]-1))
+    # print(next)
+    while 1:
+        _next = list()
+        for point in next:
+            if pipes[point[0]][point[1]] in "|7F" and pipes[point[0]+1][point[1]] in "FJL7|" and (point[0]+1,point[1]) not in visited:
+                _next.append((point[0]+1,point[1]))
+            if pipes[point[0]][point[1]] in "|JL" and pipes[point[0]-1][point[1]] in "FJL7|" and (point[0]-1,point[1]) not in visited:
+                _next.append((point[0]-1,point[1]))
+            if pipes[point[0]][point[1]] in "-FL" and pipes[point[0]][point[1]+1] in "FJL7-" and (point[0],point[1]+1) not in visited:
+                _next.append((point[0],point[1]+1))
+            if pipes[point[0]][point[1]] in "-7J" and pipes[point[0]][point[1]-1] in "FJL7-" and (point[0],point[1]-1) not in visited:
+                _next.append((point[0],point[1]-1))
+            visited.append(point)
+        if any((_next.count(n) > 1 for n in _next)):
+            return count + 1
+        next = _next
+        count += 1
+        # print(next)
+        # print(f"{visited = }")
+
 
 
 def day_10_final(text):
-    print("day 10 final is not implemented yet")
+    output = False
+    pipes = text.strip().split('\n')
+    output and print('\n'.join(pipes))
+    y_bound = len(pipes)
+    x_bound = len(pipes[0])
+    s=(0,0)
+    for i , line in enumerate(pipes):
+        if (p := line.find('S')) != -1:
+            s = (i,p)
+            break
+    visited = [s]
+    #next is a keyword. I should change this
+    next = []
+    count = 1
+    up = down = right = left = 0
+    if pipes[s[0]+1][s[1]] in "|JL":
+        down = 1
+        next.append((s[0]+1,s[1]))
+    if pipes[s[0]-1][s[1]] in "F7|":
+        up = 1
+        next.append((s[0]-1,s[1]))
+    if pipes[s[0]][s[1]+1] in "J7-":
+        right = 1
+        next.append((s[0],s[1]+1))
+    if pipes[s[0]][s[1]-1] in "FL-":
+        left = 1
+        next.append((s[0],s[1]-1))
+    if up:
+        if right:
+            pipes[s[0]] = pipes[s[0]].replace('S','L')
+        elif left:
+            pipes[s[0]] = pipes[s[0]].replace('S','J')
+        else:
+            pipes[s[0]] = pipes[s[0]].replace('S','|')
+    elif down:
+        if right:
+            pipes[s[0]] = pipes[s[0]].replace('S','F')
+        else:
+            pipes[s[0]] = pipes[s[0]].replace('S','7')
+    else:
+        pipes[s[0]] = pipes[s[0]].replace('S','-')
+    while 1:
+        _next = list()
+        for point in next:
+            y,x = point
+            if pipes[y][x] in "|7F" and pipes[y+1][x] in "FJL7|" and (y+1,x) not in visited:
+                _next.append((y+1,x))
+            if pipes[y][x] in "|JL" and pipes[y-1][x] in "FJL7|" and (y-1,x) not in visited:
+                _next.append((y-1,x))
+            if pipes[y][x] in "-FL" and pipes[y][x+1] in "FJL7-" and (y,x+1) not in visited:
+                _next.append((y,x+1))
+            if pipes[y][x] in "-7J" and pipes[y][x-1] in "FJL7-" and (y,x-1) not in visited:
+                _next.append((y,x-1))
+            visited.append(point)
+        if any((_next.count(n) > 1 for n in _next)):
+            visited.extend(_next)
+            count += 1
+            break
+        next = _next
+        count += 1
+    inside = False
+    count = 0
+    transf = {"L":"└","F":"┌","J":"┘","7":"┐","-":"─","|":"|"}
+    for i in range(y_bound):
+        pipes[i] = list(pipes[i])
+        for j in range(x_bound):
+            pipes[i][j] = transf.get(pipes[i][j]) if (i,j) in visited else ' '
+    output and print('\n'.join([''.join(line) for line in pipes]))
+    for i, line in enumerate(pipes):
+        inside = False
+        wall = 'False'
+        for j, c in enumerate(line):
+            #this logic is close but all wron....
+            if c == "-": continue
+            elif c == "|":
+                inside = not inside
+            elif c == transf["F"]:
+                wall = 'top'
+            elif c == transf['L']:
+                wall = 'bottom'
+            elif c == transf['J']:
+                if wall == "top":
+                    inside = not inside
+                wall = ''
+            elif c == transf["7"]:
+                if wall == 'bottom':
+                    inside = not inside
+                wall = ''
+            else:
+                if inside and c == ' ':
+                    # print(f"{i},{j}: {c}")
+                    pipes[i][j] = f"{colorama.Back.BLUE} {colorama.Back.RESET}"
+                    count += 1
+                    string = '\n'.join([''.join(line) for line in pipes])
+                    output and system('clear')
+                    output and print(string)
+                    output and sleep(.1)
+    return count
 
 
 def day_11(text):
