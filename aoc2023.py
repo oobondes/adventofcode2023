@@ -500,7 +500,7 @@ def day_10(text):
 
 
 def day_10_final(text):
-    output = False
+    output = False #to toggle printing
     pipes = text.strip().split('\n')
     output and print('\n'.join(pipes))
     y_bound = len(pipes)
@@ -572,7 +572,6 @@ def day_10_final(text):
         inside = False
         wall = 'False'
         for j, c in enumerate(line):
-            #this logic is close but all wron....
             if c == "-": continue
             elif c == "|":
                 inside = not inside
@@ -601,11 +600,70 @@ def day_10_final(text):
 
 
 def day_11(text):
-    print("day 11 is not implemented yet")
+    points = list()
+    row_len = text.find('\n')
+    col_len = len(text)//row_len
+    horiz_expans = [True for _ in range(row_len)]
+    vert_expans = [True for _ in range(col_len)]
+    for i, line in enumerate(text.split('\n')):
+        for j, c in enumerate(list(line)):
+            if c == '#':
+                points.append((i,j))
+                horiz_expans[j] = False
+                vert_expans[i] = False
+    total = 0
+    for i, point in enumerate(points[:-1]):
+        y,x = point
+        for j,point_2 in enumerate(points[i+1:]):
+            y_2,x_2 = point_2
+            if y_2 > y:
+                y_1, y_2 = y_2, y
+            else:
+                y_1 = y
+            if x_2 > x:
+                x_1, x_2 = x_2, x
+            else:
+                x_1 = x
+            y_diff = y_1-y_2 + sum(vert_expans[y_2:y_1])
+            x_diff = x_1-x_2 + sum(horiz_expans[x_2:x_1])
+            print(f"({point[1]},{point[0]}),({point_2[1]},{point_2[0]}): ", f"{y_diff} + {x_diff }={y_diff+x_diff}", f" added lines {sum(vert_expans[y_2:y])} and {sum(horiz_expans[x_2:x])}")
+            total += y_diff + x_diff
+    print(vert_expans)
+    print(horiz_expans)
+    return total
 
 
 def day_11_final(text):
-    print("day 11 final is not implemented yet")
+    points = list()
+    row_len = text.find('\n')
+    col_len = len(text)//row_len
+    horiz_expans = [True for _ in range(row_len)]
+    vert_expans = [True for _ in range(col_len)]
+    for i, line in enumerate(text.split('\n')):
+        for j, c in enumerate(list(line)):
+            if c == '#':
+                points.append((i,j))
+                horiz_expans[j] = False
+                vert_expans[i] = False
+    total = 0
+    for i, point in enumerate(points[:-1]):
+        y,x = point
+        for j,point_2 in enumerate(points[i+1:]):
+            y_2,x_2 = point_2
+            if y_2 > y:
+                y_1, y_2 = y_2, y
+            else:
+                y_1 = y
+            if x_2 > x:
+                x_1, x_2 = x_2, x
+            else:
+                x_1 = x
+            y_diff = y_1-y_2 + (sum(vert_expans[y_2:y_1])*999999)
+            x_diff = x_1-x_2 + (sum(horiz_expans[x_2:x_1])*999999)
+            total += y_diff + x_diff
+    print(vert_expans)
+    print(horiz_expans)
+    return total
 
 
 def day_12(text):
